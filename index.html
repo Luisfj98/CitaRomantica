@@ -331,11 +331,15 @@
     let guardado = false;
     try {
       if (!FORMSPREE_ID.startsWith('PON_')) {
+        const emojis = { Sushi: '🍣', Pizza: '🍕', Hamburguesa: '🍔', Pasta: '🍝', Ramen: '🍜', Tacos: '🌮' };
+        const sinComa = fecha.replace(',', '');
+        const fechaCorta = sinComa.charAt(0).toUpperCase() + sinComa.slice(1);
         const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
-            _subject: '¡Ha dicho que sí! 💘',
+            _subject: `💘 ¡Ha dicho que sí! ${fechaCorta}, ${hora.value} · ${emojis[comida]} ${comida}`,
+            resumen: `Cita confirmada para el ${fecha.replace(',', '')} a las ${hora.value}. Le apetece ${comida.toLowerCase()}.`,
             dia: fecha,
             hora: hora.value,
             comida,
