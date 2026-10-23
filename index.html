@@ -294,7 +294,8 @@
     document.getElementById('ask').hidden = true;
     no.hidden = true;
     document.getElementById('yay').hidden = false;
-    fx.rise();
+    fx.rise(150);
+    fx.rain(300);
   });
 
   const dia = document.getElementById('dia');
@@ -392,6 +393,7 @@
     let raining = false;
     let running = false;
     let lastDrop = 0;
+    let dropEvery = 140;
 
     function resize() {
       const dpr = window.devicePixelRatio || 1;
@@ -415,7 +417,7 @@
 
     function frame(t) {
       ctx.clearRect(0, 0, innerWidth, innerHeight);
-      if (raining && t - lastDrop > 140) {
+      if (raining && t - lastDrop > dropEvery) {
         lastDrop = t;
         parts.push({ x: Math.random() * innerWidth, y: -30, s: 10 + Math.random() * 16, vx: 0, vy: 1 + Math.random() * 1.8, g: 0, w: Math.random() * 6.3, sway: 15, fade: 0, a: 1, col: color() });
       }
@@ -455,9 +457,10 @@
         }
         start();
       },
-      // Lluvia continua desde arriba
-      rain() {
+      // Lluvia continua desde arriba; every = milisegundos entre corazón y corazón
+      rain(every = 140) {
         if (reduced()) return;
+        dropEvery = every;
         raining = true;
         start();
       }
