@@ -257,11 +257,11 @@
       no.classList.add('loose');
       no.getBoundingClientRect();
     }
-    // El Sí crece un 30 % por cada huida, hasta casi ocupar el ancho de la pantalla
+    // El Sí crece un 20 % por cada huida, hasta casi ocupar el ancho de la pantalla
     dodges++;
     hint.textContent = phrases[(dodges - 1) % phrases.length];
     const maxGrow = Math.max(1.5, Math.min(4, (innerWidth - 32) / yesBase.w, (innerHeight * 0.28) / yesBase.h));
-    yes.style.setProperty('--grow', Math.min(1 + dodges * 0.3, maxGrow).toFixed(2));
+    yes.style.setProperty('--grow', Math.min(1 + dodges * 0.2, maxGrow).toFixed(2));
     yes.classList.remove('pop'); void yes.offsetWidth; yes.classList.add('pop');
 
     const pad = 16;
