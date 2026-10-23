@@ -80,10 +80,13 @@
     background: var(--cherry);
     color: var(--paper);
     box-shadow: 0 6px 0 var(--cherry-dark);
-    transform: scale(var(--grow, 1));
+    font-size: calc(1.25rem * var(--grow, 1));
+    max-width: 100%;
   }
-  #yes:hover { transform: scale(calc(var(--grow, 1) * 1.05)); }
-  #yes:active { box-shadow: 0 2px 0 var(--cherry-dark); transform: scale(var(--grow, 1)) translateY(4px); }
+  #yes:hover { transform: scale(1.05); }
+  #yes:active { box-shadow: 0 2px 0 var(--cherry-dark); transform: translateY(4px); }
+  #yes.pop { animation: pop .35s cubic-bezier(.34, 1.56, .64, 1); }
+  @keyframes pop { from { transform: scale(.8); } to { transform: scale(1); } }
   #no {
     background: var(--paper);
     color: var(--ink);
@@ -242,6 +245,7 @@
   const hint = document.getElementById('hint');
   const phrases = ['¿Seguro?', 'Piénsalo bien…', '¡Casi!', 'Ese botón no funciona', 'Prueba con el otro', 'Venga, di que sí', 'No te escapas'];
   let dodges = 0;
+  const yesBase = { w: yes.offsetWidth, h: yes.offsetHeight };
 
   function dodge(e) {
     if (e) e.preventDefault();
@@ -253,6 +257,13 @@
       no.classList.add('loose');
       no.getBoundingClientRect();
     }
+    // El Sí crece un 30 % por cada huida, hasta casi ocupar el ancho de la pantalla
+    dodges++;
+    hint.textContent = phrases[(dodges - 1) % phrases.length];
+    const maxGrow = Math.max(1.5, Math.min(4, (innerWidth - 32) / yesBase.w, (innerHeight * 0.28) / yesBase.h));
+    yes.style.setProperty('--grow', Math.min(1 + dodges * 0.3, maxGrow).toFixed(2));
+    yes.classList.remove('pop'); void yes.offsetWidth; yes.classList.add('pop');
+
     const pad = 16;
     const maxX = window.innerWidth - r.width - pad;
     const maxY = window.innerHeight - r.height - pad;
@@ -268,10 +279,6 @@
     ));
     no.style.left = x + 'px';
     no.style.top = y + 'px';
-
-    dodges++;
-    hint.textContent = phrases[(dodges - 1) % phrases.length];
-    yes.style.setProperty('--grow', Math.min(1 + dodges * 0.08, 1.8));
   }
 
   no.addEventListener('pointerenter', dodge);
