@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Quieres una cita conmigo?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Nunito:wght@500;800&display=swap">
+<style>
+  /* Una sola pantalla centrada, como una nota escrita a mano; look rosado único (sin modo oscuro, a propósito) */
+  :root {
+    --bg: #ffe4ec;
+    --bg-2: #ffc9d8;
+    --ink: #4b0f22;
+    --cherry: #e0245e;
+    --cherry-dark: #b3123f;
+    --paper: #fff7f9;
+    --font-display: "Caveat Brush", "Segoe Print", "Comic Sans MS", cursive;
+    --font-body: "Nunito", system-ui, -apple-system, sans-serif;
+    color-scheme: light;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  [hidden] { display: none !important; }
+  body {
+    background: radial-gradient(circle at 50% 35%, var(--paper) 0%, var(--bg) 45%, var(--bg-2) 100%);
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    overflow: hidden;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    box-sizing: border-box;
+  }
+  .screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    text-align: center;
+  }
+  .heart {
+    width: 84px; height: 84px;
+    animation: beat 1.4s ease-in-out infinite;
+  }
+  @keyframes beat { 0%,100% { transform: scale(1) } 15% { transform: scale(1.12) } 30% { transform: scale(1) } 45% { transform: scale(1.08) } }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.6rem, 9vw, 5rem);
+    line-height: 1.05;
+    margin: 0;
+    text-wrap: balance;
+    max-width: 14ch;
+  }
+  .hint { margin: -1rem 0 0; font-size: 1rem; opacity: .7; min-height: 1.5em; }
+  .buttons { display: flex; gap: 1.25rem; align-items: center; justify-content: center; flex-wrap: wrap; }
+  button {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: 1.25rem;
+    border: none;
+    border-radius: 999px;
+    padding: .8em 2em;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  #yes {
+    background: var(--cherry);
+    color: var(--paper);
+    box-shadow: 0 6px 0 var(--cherry-dark);
+    transform: scale(var(--grow, 1));
+  }
+  #yes:hover { transform: scale(calc(var(--grow, 1) * 1.05)); }
+  #yes:active { box-shadow: 0 2px 0 var(--cherry-dark); transform: scale(var(--grow, 1)) translateY(4px); }
+  #no {
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 4px 0 var(--bg-2);
+    white-space: nowrap;
+    touch-action: none;
+  }
+  #no.loose {
+    position: fixed;
+    z-index: 5;
+    transition: left .25s ease, top .25s ease;
+  }
+  .card {
+    background: var(--paper);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(179, 18, 63, .15);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+  }
+  .field { display: flex; flex-direction: column; gap: .35rem; }
+  label { font-weight: 800; font-size: .95rem; }
+  .step { display: flex; flex-direction: column; gap: 1rem; }
+  .chosen {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    background: var(--bg); border-radius: 12px; padding: .65em .8em;
+    font-weight: 800; color: var(--cherry-dark);
+  }
+  .chosen span { min-width: 0; }
+  button.link {
+    background: none; box-shadow: none; padding: .2em .4em; font-size: .9rem;
+    color: var(--ink); text-decoration: underline; flex-shrink: 0;
+  }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { font-weight: 800; font-size: .95rem; padding: 0; margin-bottom: .35rem; }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .tile {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .25rem;
+    background: var(--bg);
+    border: 2px solid var(--bg-2);
+    border-radius: 14px;
+    padding: .7rem .25rem;
+    font-weight: 800; font-size: .85rem;
+    cursor: pointer;
+    text-align: center;
+    transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    min-width: 0;
+  }
+  .tile .emoji { font-size: 1.8rem; line-height: 1; }
+  .tile input { position: absolute; opacity: 0; pointer-events: none; }
+  .tile:hover { transform: translateY(-2px); }
+  .tile:has(input:checked) { border-color: var(--cherry); background: var(--paper); box-shadow: 0 0 0 2px var(--cherry) inset; color: var(--cherry-dark); }
+  .tile:has(input:focus-visible) { outline: 3px solid var(--ink); outline-offset: 2px; }
+  input {
+    font: inherit;
+    font-size: 1.05rem;
+    color: var(--ink);
+    background: var(--bg);
+    border: 2px solid var(--bg-2);
+    border-radius: 12px;
+    padding: .65em .8em;
+    min-width: 0;
+  }
+  input:focus-visible { outline: none; border-color: var(--cherry); }
+  #send {
+    background: var(--cherry);
+    color: var(--paper);
+    box-shadow: 0 5px 0 var(--cherry-dark);
+    font-size: 1.1rem;
+    padding: .8em 1em;
+  }
+  #send:disabled { opacity: .6; cursor: wait; }
+  .error { color: var(--cherry-dark); font-weight: 800; margin: 0; min-height: 1.2em; font-size: .95rem; }
+  .when { font-family: var(--font-display); font-size: clamp(1.8rem, 6vw, 2.6rem) !important; color: var(--cherry); line-height: 1.15 !important; text-wrap: balance; }
+  .yay { gap: 1.25rem; overflow-y: auto; padding-block: 1.5rem; box-sizing: border-box; }
+  .yay h1 { max-width: 16ch; }
+  .yay p { font-size: 1.2rem; margin: 0; max-width: 32ch; line-height: 1.5; }
+  canvas { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  @media (prefers-reduced-motion: reduce) {
+    .heart { animation: none; }
+    #no.loose { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main class="screen" id="ask">
+  <svg class="heart" viewBox="0 0 32 29" aria-hidden="true">
+    <path fill="#e0245e" d="M23.6 0c-3.4 0-6.3 2.7-7.6 5.6C14.7 2.7 11.8 0 8.4 0 3.8 0 0 3.8 0 8.4c0 9.4 9.5 11.9 16 21.2 6.1-9.3 16-12.1 16-21.2C32 3.8 28.2 0 23.6 0z"/>
+  </svg>
+  <h1>¿Quieres una cita conmigo?</h1>
+  <p class="hint" id="hint"></p>
+  <div class="buttons">
+    <button id="yes" type="button">Sí</button>
+    <button id="no" type="button">No</button>
+  </div>
+</main>
+
+<main class="screen yay" id="yay" hidden>
+  <h1>¡Sabía que dirías que sí!</h1>
+  <p id="intro">Primero, elige cuándo te viene bien.</p>
+  <form class="card" id="plan" novalidate>
+    <div class="step" id="paso1">
+    <div class="field">
+      <label for="dia">Día</label>
+      <input type="date" id="dia" required>
+    </div>
+    <div class="field">
+      <label for="hora">Hora</label>
+      <input type="time" id="hora" step="900" value="20:00" required>
+    </div>
+    </div>
+    <div class="chosen" id="chosen" hidden>
+      <span id="chosenText"></span>
+      <button type="button" class="link" id="cambiar">Cambiar</button>
+    </div>
+    <fieldset class="field" id="paso2" hidden>
+      <legend>Tipo de comida</legend>
+      <div class="tiles">
+        <label class="tile"><input type="radio" name="comida" value="Sushi" id="comida-sushi"><span class="emoji" aria-hidden="true">🍣</span><span>Sushi</span></label>
+        <label class="tile"><input type="radio" name="comida" value="Pizza" id="comida-pizza"><span class="emoji" aria-hidden="true">🍕</span><span>Pizza</span></label>
+        <label class="tile"><input type="radio" name="comida" value="Hamburguesa" id="comida-hamburguesa"><span class="emoji" aria-hidden="true">🍔</span><span>Hamburguesa</span></label>
+        <label class="tile"><input type="radio" name="comida" value="Pasta" id="comida-pasta"><span class="emoji" aria-hidden="true">🍝</span><span>Pasta</span></label>
+        <label class="tile"><input type="radio" name="comida" value="Ramen" id="comida-ramen"><span class="emoji" aria-hidden="true">🍜</span><span>Ramen</span></label>
+        <label class="tile"><input type="radio" name="comida" value="Tacos" id="comida-tacos"><span class="emoji" aria-hidden="true">🌮</span><span>Tacos</span></label>
+      </div>
+    </fieldset>
+    <p class="error" id="error" role="alert"></p>
+    <button id="send" type="submit">Confirmar día y hora</button>
+  </form>
+</main>
+
+<main class="screen yay" id="done" hidden>
+  <svg class="heart" viewBox="0 0 32 29" aria-hidden="true">
+    <path fill="#e0245e" d="M23.6 0c-3.4 0-6.3 2.7-7.6 5.6C14.7 2.7 11.8 0 8.4 0 3.8 0 0 3.8 0 8.4c0 9.4 9.5 11.9 16 21.2 6.1-9.3 16-12.1 16-21.2C32 3.8 28.2 0 23.6 0z"/>
+  </svg>
+  <h1>¡Es una cita!</h1>
+  <p class="when" id="when"></p>
+  <p id="doneMsg"></p>
+</main>
+
+<canvas id="fx"></canvas>
+
+<script>
+  const no = document.getElementById('no');
+  const yes = document.getElementById('yes');
+  const hint = document.getElementById('hint');
+  const phrases = ['¿Seguro?', 'Piénsalo bien…', '¡Casi!', 'Ese botón no funciona', 'Prueba con el otro', 'Venga, di que sí', 'No te escapas'];
+  let dodges = 0;
+
+  function dodge(e) {
+    if (e) e.preventDefault();
+    const r = no.getBoundingClientRect();
+    if (!no.classList.contains('loose')) {
+      // Fijarlo donde está antes de soltarlo, para que la primera huida se anime
+      no.style.left = r.left + 'px';
+      no.style.top = r.top + 'px';
+      no.classList.add('loose');
+      no.getBoundingClientRect();
+    }
+    const pad = 16;
+    const maxX = window.innerWidth - r.width - pad;
+    const maxY = window.innerHeight - r.height - pad;
+    const yr = yes.getBoundingClientRect();
+    let x, y, tries = 0;
+    do {
+      x = pad + Math.random() * Math.max(0, maxX - pad);
+      y = pad + Math.random() * Math.max(0, maxY - pad);
+      tries++;
+    } while (tries < 30 && (
+      Math.hypot(x - r.left, y - r.top) < 140 ||
+      (x < yr.right + 10 && x + r.width > yr.left - 10 && y < yr.bottom + 10 && y + r.height > yr.top - 10)
+    ));
+    no.style.left = x + 'px';
+    no.style.top = y + 'px';
+
+    dodges++;
+    hint.textContent = phrases[(dodges - 1) % phrases.length];
+    yes.style.setProperty('--grow', Math.min(1 + dodges * 0.08, 1.8));
+  }
+
+  no.addEventListener('pointerenter', dodge);
+  no.addEventListener('touchstart', dodge, { passive: false });
+  no.addEventListener('pointerdown', dodge);
+  no.addEventListener('click', dodge);
+  no.addEventListener('focus', () => dodge());
+
+  yes.addEventListener('click', () => {
+    document.getElementById('ask').hidden = true;
+    no.hidden = true;
+    document.getElementById('yay').hidden = false;
+    hearts();
+  });
+
+  const dia = document.getElementById('dia');
+  const hora = document.getElementById('hora');
+  const error = document.getElementById('error');
+  const send = document.getElementById('send');
+  const pad2 = n => String(n).padStart(2, '0');
+  const today = new Date();
+  dia.min = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+  const sugerido = new Date(today); sugerido.setDate(today.getDate() + 1);
+  dia.value = `${sugerido.getFullYear()}-${pad2(sugerido.getMonth() + 1)}-${pad2(sugerido.getDate())}`;
+
+  // Pega aquí el código de tu formulario de Formspree (lo que va después de /f/ en https://formspree.io/f/xxxxxxx)
+  const FORMSPREE_ID = 'PON_AQUI_TU_CODIGO';
+
+  const paso1 = document.getElementById('paso1');
+  const paso2 = document.getElementById('paso2');
+  const chosen = document.getElementById('chosen');
+  const intro = document.getElementById('intro');
+  document.getElementById('cambiar').addEventListener('click', () => {
+    error.textContent = '';
+    paso1.hidden = false;
+    chosen.hidden = true;
+    paso2.hidden = true;
+    intro.textContent = 'Primero, elige cuándo te viene bien.';
+    send.textContent = 'Confirmar día y hora';
+    dia.focus();
+  });
+
+  document.getElementById('plan').addEventListener('submit', async e => {
+    e.preventDefault();
+    error.textContent = '';
+    if (!dia.value) { error.textContent = 'Elige un día.'; dia.focus(); return; }
+    if (!hora.value) { error.textContent = 'Elige una hora.'; hora.focus(); return; }
+    const cuando = new Date(`${dia.value}T${hora.value}`);
+    if (cuando < new Date()) { error.textContent = 'Esa fecha ya ha pasado. Elige otra.'; dia.focus(); return; }
+    const fecha = cuando.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    if (paso2.hidden) {
+      document.getElementById('chosenText').textContent = `${fecha} a las ${hora.value}`;
+      paso1.hidden = true;
+      chosen.hidden = false;
+      paso2.hidden = false;
+      intro.textContent = '¡Apuntado! Ahora, ¿qué te apetece comer?';
+      send.textContent = 'Confirmar la cita';
+      document.getElementById('comida-sushi').focus();
+      return;
+    }
+
+    const comida = document.querySelector('input[name="comida"]:checked')?.value;
+    if (!comida) { error.textContent = 'Elige qué te apetece comer.'; document.getElementById('comida-sushi').focus(); return; }
+
+    send.disabled = true;
+    send.textContent = 'Guardando…';
+    let guardado = false;
+    try {
+      if (!FORMSPREE_ID.startsWith('PON_')) {
+        const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            _subject: '¡Ha dicho que sí! 💘',
+            dia: fecha,
+            hora: hora.value,
+            comida,
+            enviado: new Date().toLocaleString('es-ES')
+          })
+        });
+        guardado = res.ok;
+      }
+    } catch (err) { guardado = false; }
+
+    document.getElementById('when').textContent = `${fecha} a las ${hora.value}`;
+    document.getElementById('doneMsg').textContent = guardado
+      ? `Toca ${comida.toLowerCase()}. ` + 'Ya me ha llegado tu respuesta. ¡Nos vemos!'
+      : `Toca ${comida.toLowerCase()}. ` + 'Hazle una captura a esta pantalla y mándamela.';
+    document.getElementById('yay').hidden = true;
+    document.getElementById('done').hidden = false;
+    hearts();
+  });
+
+  function hearts() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const c = document.getElementById('fx');
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    c.width = innerWidth * dpr; c.height = innerHeight * dpr;
+    ctx.scale(dpr, dpr);
+    const colors = ['#e0245e', '#ff6b93', '#b3123f', '#ff9fb8'];
+    const parts = Array.from({ length: 90 }, () => ({
+      x: Math.random() * innerWidth,
+      y: innerHeight + Math.random() * innerHeight * 0.6,
+      s: 8 + Math.random() * 16,
+      v: 1.5 + Math.random() * 3,
+      w: Math.random() * Math.PI * 2,
+      col: colors[Math.floor(Math.random() * colors.length)]
+    }));
+    function heart(x, y, s, col) {
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(x, y + s * 0.3);
+      ctx.bezierCurveTo(x, y, x - s / 2, y, x - s / 2, y + s * 0.3);
+      ctx.bezierCurveTo(x - s / 2, y + s * 0.6, x, y + s * 0.8, x, y + s);
+      ctx.bezierCurveTo(x, y + s * 0.8, x + s / 2, y + s * 0.6, x + s / 2, y + s * 0.3);
+      ctx.bezierCurveTo(x + s / 2, y, x, y, x, y + s * 0.3);
+      ctx.fill();
+    }
+    const start = performance.now();
+    (function frame(t) {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      let alive = false;
+      for (const p of parts) {
+        p.y -= p.v;
+        p.w += 0.03;
+        if (p.y > -p.s) alive = true;
+        heart(p.x + Math.sin(p.w) * 20, p.y, p.s, p.col);
+      }
+      if (alive && t - start < 9000) requestAnimationFrame(frame);
+      else ctx.clearRect(0, 0, innerWidth, innerHeight);
+    })(start);
+  }
+
+  addEventListener('resize', () => {
+    if (!no.classList.contains('loose')) return;
+    const r = no.getBoundingClientRect();
+    no.style.left = Math.min(r.left, innerWidth - r.width - 16) + 'px';
+    no.style.top = Math.min(r.top, innerHeight - r.height - 16) + 'px';
+  });
+</script>
+</body>
+</html>
