@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffe4ec" id="themeColor">
 <title>¿Quieres una cita conmigo?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -200,6 +201,8 @@
     100% { transform: scale(30); }
   }
   @keyframes intro-text { 0% { opacity: 0; } 25%, 75% { opacity: 1; } 100% { opacity: 0; } }
+  /* Mientras el corazón llena la pantalla, también las barras de Safari en iPhone se ponen rojas */
+  html.intro-red, html.intro-red body { background: var(--cherry); }
   @keyframes intro-out { to { opacity: 0; visibility: hidden; } }
   @media (prefers-reduced-motion: reduce) {
     .intro { animation-delay: 1.2s; }
@@ -284,7 +287,19 @@
 <script>
   // Quitar la animación de entrada al terminar, o antes si se toca la pantalla
   const introAnim = document.getElementById('intro-anim');
-  const endIntro = () => introAnim.remove();
+  const themeColor = document.getElementById('themeColor');
+  const setRed = on => {
+    document.documentElement.classList.toggle('intro-red', on);
+    themeColor.content = on ? '#e0245e' : '#ffe4ec';
+  };
+  const reducedIntro = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const redOn = reducedIntro ? 0 : setTimeout(() => setRed(true), 2400);
+  const redOff = setTimeout(() => setRed(false), 2950);
+  const endIntro = () => {
+    clearTimeout(redOn); clearTimeout(redOff);
+    setRed(false);
+    introAnim.remove();
+  };
   introAnim.addEventListener('animationend', e => { if (e.target === introAnim) endIntro(); });
   introAnim.addEventListener('click', endIntro);
   setTimeout(() => introAnim.isConnected && endIntro(), 4000);
