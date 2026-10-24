@@ -202,7 +202,7 @@
   }
   @keyframes intro-text { 0% { opacity: 0; } 25%, 75% { opacity: 1; } 100% { opacity: 0; } }
   /* Mientras el corazón llena la pantalla, también las barras de Safari en iPhone se ponen rojas */
-  html.intro-red, html.intro-red body { background: var(--cherry); }
+  html.intro-red, html.intro-red body, html.intro-red .intro { background: var(--cherry); }
   @keyframes intro-out { to { opacity: 0; visibility: hidden; } }
   @media (prefers-reduced-motion: reduce) {
     .intro { animation-delay: 1.2s; }
@@ -291,6 +291,8 @@
   const setRed = on => {
     document.documentElement.classList.toggle('intro-red', on);
     themeColor.content = on ? '#e0245e' : '#ffe4ec';
+    // Safari en iPhone colorea sus barras según el fondo del elemento fijo que toca el borde (esta capa)
+    if (introAnim.isConnected) introAnim.style.backgroundColor = on ? '#e0245e' : '';
   };
   const reducedIntro = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const redOn = reducedIntro ? 0 : setTimeout(() => setRed(true), 2400);
